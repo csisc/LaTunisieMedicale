@@ -182,9 +182,9 @@ SELECT ?article WHERE {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-6 md:p-12">
       <div className="max-w-5xl mx-auto">
         <header className="mb-10 text-center">
-          <BookOpen className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+          <img src="https://cdn.ncbi.nlm.nih.gov/pmc/banners/logo-tunismend.png" />
           <h1 className="text-4xl font-semibold tracking-tight mb-2">La Tunisie Médicale</h1>
-          <p className="text-slate-500 mb-8 font-medium">Table of Contents Generator via Wikidata</p>
+          <p className="text-slate-500 mb-8 font-medium">User-friendly web interface for the journal's open archives</p>
           
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 inline-flex flex-wrap items-center justify-center gap-4 max-w-full">
             <div className="flex items-center gap-2">
