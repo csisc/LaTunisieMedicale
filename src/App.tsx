@@ -191,9 +191,9 @@ SELECT ?article WHERE {
           <div align="center">
             <b>Powered by:</b>
             <br />
-            <img src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/wikidata.png" height="20%" />
-            <img src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/stsm.png" height="20%" />
-            <img src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/ant.png" height="20%" />
+            <img src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/wikidata.png" />
+            <img src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/stsm.png" />
+            <img src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/ant.png" />
           </div>
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 inline-flex flex-wrap items-center justify-center gap-4 max-w-full">
             <div className="flex items-center gap-2">
