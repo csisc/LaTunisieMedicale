@@ -294,10 +294,7 @@ SELECT ?article WHERE {
             </div>
           </div>
         )}
-
       </div>
-    </div>
 </div>
   );
 }
-
