@@ -297,28 +297,6 @@ SELECT ?article WHERE {
 
       </div>
     </div>
-  <div style="text-align: center; padding: 16px;">
-  <p style="margin: 0 0 12px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; color: #555;">
-    Powered by
-  </p>
-
-  <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
-    <img
-      src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/wikidata.png"
-      alt="Wikidata"
-      style="height: 40px; width: auto; object-fit: contain;"
-    />
-    <img
-      src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/stsm.png"
-      alt="STSM"
-      style="height: 40px; width: auto; object-fit: contain;"
-    />
-    <img
-      src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/ant.png"
-      alt="ANT"
-      style="height: 40px; width: auto; object-fit: contain;"
-    />
-  </div>
 </div>
   );
 }
