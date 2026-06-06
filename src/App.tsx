@@ -187,7 +187,8 @@ SELECT ?article WHERE {
             <br />
           </div>
           <h1 className="text-4xl font-semibold tracking-tight mb-2">La Tunisie Médicale</h1>
-          <p className="text-slate-500 mb-8 font-medium">User-friendly web interface for the journal's open archives</p>
+          <p className="text-slate-500 mb-8 font-medium">Table of Contents Generator via Wikidata</p>
+          
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 inline-flex flex-wrap items-center justify-center gap-4 max-w-full">
             <div className="flex items-center gap-2">
               <label htmlFor="volume" className="text-sm font-semibold text-slate-700">Volume</label>
@@ -294,7 +295,37 @@ SELECT ?article WHERE {
             </div>
           </div>
         )}
+
       </div>
-</div>
+
+      <footer className="mt-16 pb-8 text-center bg-transparent w-full">
+        <p className="mb-4 text-xs font-semibold tracking-wider text-slate-500 uppercase">
+          Powered by
+        </p>
+        <div className="flex justify-center items-center gap-6 sm:gap-10 flex-wrap opacity-80 hover:opacity-100 transition-opacity">
+          <img
+            src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/wikidata.png"
+            alt="Wikidata"
+            className="h-10 w-auto object-contain hover:scale-105 transition-transform"
+          />
+          <img
+            src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/stsm.png"
+            alt="Société Tunisienne des Sciences Médicales"
+            className="h-10 w-auto object-contain hover:scale-105 transition-transform"
+          />
+          <img
+            src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/ant.png"
+            alt="Archives Nationales de Tunisie"
+            className="h-10 w-auto object-contain hover:scale-105 transition-transform"
+          />
+          <img
+            src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/ais.png"
+            alt="Google AI Studio"
+            className="h-10 w-auto object-contain hover:scale-105 transition-transform"
+          />
+        </div>
+      </footer>
+    </div>
   );
 }
+
