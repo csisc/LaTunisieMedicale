@@ -182,7 +182,9 @@ SELECT ?article WHERE {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-6 md:p-12">
       <div className="max-w-5xl mx-auto">
         <header className="mb-10 text-center">
-          <img src="https://cdn.ncbi.nlm.nih.gov/pmc/banners/logo-tunismend.png" style="{align: center};" />
+          <div align="center">
+          <img src="https://cdn.ncbi.nlm.nih.gov/pmc/banners/logo-tunismend.png" />
+          </div>
           <h1 className="text-4xl font-semibold tracking-tight mb-2">La Tunisie Médicale</h1>
           <p className="text-slate-500 mb-8 font-medium">User-friendly web interface for the journal's open archives</p>
           
