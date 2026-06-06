@@ -188,29 +188,6 @@ SELECT ?article WHERE {
           </div>
           <h1 className="text-4xl font-semibold tracking-tight mb-2">La Tunisie Médicale</h1>
           <p className="text-slate-500 mb-8 font-medium">User-friendly web interface for the journal's open archives</p>
-          <div style="text-align: center; padding: 16px;">
-  <p style="margin: 0 0 12px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; color: #555;">
-    Powered by
-  </p>
-
-  <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
-    <img
-      src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/wikidata.png"
-      alt="Wikidata"
-      style="height: 40px; width: auto; object-fit: contain;"
-    />
-    <img
-      src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/stsm.png"
-      alt="STSM"
-      style="height: 40px; width: auto; object-fit: contain;"
-    />
-    <img
-      src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/ant.png"
-      alt="ANT"
-      style="height: 40px; width: auto; object-fit: contain;"
-    />
-  </div>
-</div>
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 inline-flex flex-wrap items-center justify-center gap-4 max-w-full">
             <div className="flex items-center gap-2">
               <label htmlFor="volume" className="text-sm font-semibold text-slate-700">Volume</label>
@@ -320,6 +297,29 @@ SELECT ?article WHERE {
 
       </div>
     </div>
+  <div style="text-align: center; padding: 16px;">
+  <p style="margin: 0 0 12px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; color: #555;">
+    Powered by
+  </p>
+
+  <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+    <img
+      src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/wikidata.png"
+      alt="Wikidata"
+      style="height: 40px; width: auto; object-fit: contain;"
+    />
+    <img
+      src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/stsm.png"
+      alt="STSM"
+      style="height: 40px; width: auto; object-fit: contain;"
+    />
+    <img
+      src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/ant.png"
+      alt="ANT"
+      style="height: 40px; width: auto; object-fit: contain;"
+    />
+  </div>
+</div>
   );
 }
 
