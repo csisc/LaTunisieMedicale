@@ -183,11 +183,18 @@ SELECT ?article WHERE {
       <div className="max-w-5xl mx-auto">
         <header className="mb-10 text-center">
           <div align="center">
-          <img src="https://cdn.ncbi.nlm.nih.gov/pmc/banners/logo-tunismend.png" />
+            <img src="https://cdn.ncbi.nlm.nih.gov/pmc/banners/logo-tunismend.png" />
+            <br />
           </div>
           <h1 className="text-4xl font-semibold tracking-tight mb-2">La Tunisie Médicale</h1>
           <p className="text-slate-500 mb-8 font-medium">User-friendly web interface for the journal's open archives</p>
-          
+          <div align="center">
+            <b>Powered by:</b>
+            <br />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Wikidata-logo-en.svg/330px-Wikidata-logo-en.svg.png" />
+            <img src="https://latunisiemedicale.com/public/journals/1/journalThumbnail_en_US.png" />
+            <img src="https://www.bing.com/images/search?view=detailV2&ccid=inKrfb2x&id=DFF72CF099CC5FD5C70689A0DA292629372CDB36&thid=OIP.inKrfb2x4TWPduRziIHKtQHaFV&mediaurl=https%3A%2F%2Fwww.archives.nat.tn%2Fwp-content%2Fuploads%2F2022%2F07%2Flogo-ant.png&cdnurl=https%3A%2F%2Fth.bing.com%2Fth%2Fid%2FR.8a72ab7dbdb1e1358f76e4738881cab5%3Frik%3DNtssNykmKdqgiQ%26pid%3DImgRaw%26r%3D0&exph=1239&expw=1719&q=archives+nationales+de+tunisie&FORM=IRPRST&ck=3658292ECF768CCB02078CA88CEEEAE0&selectedIndex=0&itb=0&cw=825&ch=420&ajaxhist=0&ajaxserp=0" />
+          </div>
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 inline-flex flex-wrap items-center justify-center gap-4 max-w-full">
             <div className="flex items-center gap-2">
               <label htmlFor="volume" className="text-sm font-semibold text-slate-700">Volume</label>
