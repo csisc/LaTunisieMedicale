@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, BookOpen, ExternalLink } from 'lucide-react';
+import { Search, Loader2, ExternalLink } from 'lucide-react';
 
 interface ArticleData {
   id: string;
@@ -71,8 +71,9 @@ SELECT ?article WHERE {
       });
 
       // Step 2: Fetch full entity data from Wikidata API in batches of 50
-      const fetchedArticles: ArticleData[] = [];
+      const fetchedArticles: any[] = [];
       const batchSize = 50;
+      const allAuthorQids = new Set<string>();
       
       for (let i = 0; i < articleIds.length; i += batchSize) {
         const batchIds = articleIds.slice(i, i + batchSize);
@@ -130,16 +131,14 @@ SELECT ?article WHERE {
               });
             }
 
-            // Collect linked authors
-            // In a complete implementation we would batch fetch the author item labels, 
-            // but for simplicity we will just show their QIDs or assume P2093 is populated.
-            // Often Wikidata creates P2093 or P50 + rdfs:label. 
-            // We'll add QIDs if P50 exists.
+            // Collect linked authors QIDs
+            const authorQids: string[] = [];
             if (claims.P50) {
               claims.P50.forEach((claim: any) => {
-                if (claim.mainsnak?.datavalue?.value?.id) {
-                   // A more advanced app would fetch these P50 QIDs iteratively.
-                   authors.push(claim.mainsnak.datavalue.value.id);
+                const qid = claim.mainsnak?.datavalue?.value?.id;
+                if (qid) {
+                   authorQids.push(qid);
+                   allAuthorQids.add(qid);
                 }
               });
             }
@@ -148,6 +147,7 @@ SELECT ?article WHERE {
               id,
               title,
               authors,
+              authorQids,
               pages,
               doi,
               pubDate,
@@ -157,14 +157,52 @@ SELECT ?article WHERE {
         }
       }
 
+      // Step 3: Fetch author labels
+      const authorLabels: Record<string, string> = {};
+      if (allAuthorQids.size > 0) {
+        const authorIdsArray = Array.from(allAuthorQids);
+        for (let i = 0; i < authorIdsArray.length; i += 50) {
+          const batchIds = authorIdsArray.slice(i, i + 50);
+          const wbUrl = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${batchIds.join('|')}&format=json&props=labels&origin=*`;
+          const wbRes = await fetch(wbUrl);
+          if (wbRes.ok) {
+            const wbData = await wbRes.json();
+            if (wbData.entities) {
+              for (const [aId, aEntity] of Object.entries<any>(wbData.entities)) {
+                authorLabels[aId] = aEntity.labels?.en?.value || aEntity.labels?.fr?.value || aEntity.labels?.ar?.value || aId;
+              }
+            }
+          }
+        }
+      }
+
+      // Step 4: Resolve author QIDs to labels
+      const finalArticles: ArticleData[] = fetchedArticles.map(article => {
+        const resolvedAuthors = [...article.authors];
+        if (article.authorQids) {
+          article.authorQids.forEach((qid: string) => {
+            resolvedAuthors.push(authorLabels[qid] || qid);
+          });
+        }
+        return {
+          id: article.id,
+          title: article.title,
+          authors: resolvedAuthors,
+          pages: article.pages,
+          doi: article.doi,
+          pubDate: article.pubDate,
+          url: article.url
+        };
+      });
+
       // Sort by pages if possible
-      fetchedArticles.sort((a, b) => {
+      finalArticles.sort((a, b) => {
         const aPage = parseInt(a.pages.split('-')[0]) || 0;
         const bPage = parseInt(b.pages.split('-')[0]) || 0;
         return aPage - bPage;
       });
 
-      setArticles(fetchedArticles);
+      setArticles(finalArticles);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'An error occurred fetching the data.');
@@ -182,10 +220,7 @@ SELECT ?article WHERE {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-6 md:p-12">
       <div className="max-w-5xl mx-auto">
         <header className="mb-10 text-center">
-          <div align="center">
-            <img src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/tunismed.png" />
-            <br />
-          </div>
+          <img src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/tunismed.png" alt="La Tunisie Médicale" className="h-24 w-auto mx-auto mb-4 object-contain" />
           <h1 className="text-4xl font-semibold tracking-tight mb-2">La Tunisie Médicale</h1>
           <p className="text-slate-500 mb-8 font-medium">Table of Contents Generator via Wikidata</p>
           
