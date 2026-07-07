@@ -17,16 +17,26 @@ interface ArticleData {
 }
 
 export default function App() {
+  const [searchMode, setSearchMode] = useState<'toc' | 'search'>('toc');
+  const [titleQuery, setTitleQuery] = useState('');
+  const [authorQuery, setAuthorQuery] = useState('');
   const [volume, setVolume] = useState('102');
   const [issue, setIssue] = useState('2');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [articles, setArticles] = useState<ArticleData[]>([]);
 
-  const fetchTOC = async () => {
-    if (!volume) {
-      setError('Please provide a volume.');
-      return;
+  const fetchArticles = async () => {
+    if (searchMode === 'toc') {
+      if (!volume) {
+        setError('Please provide a volume.');
+        return;
+      }
+    } else {
+      if (!titleQuery && !authorQuery) {
+        setError('Please provide at least a title keyword or an author name.');
+        return;
+      }
     }
 
     setLoading(true);
@@ -34,33 +44,86 @@ export default function App() {
     setArticles([]);
 
     try {
-      // Step 1: Use QLever to find the article Wikidata IDs
-      const issueClause = issue ? `?article wdt:P433 "${issue}" .` : '';
-      const sparqlQuery = `
+      let sparqlQuery = '';
+      if (searchMode === 'toc') {
+        const issueClause = issue ? `?article wdt:P433 "${issue}" .` : '';
+        sparqlQuery = `
 PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 
-SELECT ?article WHERE {
+SELECT DISTINCT ?article WHERE {
   ?article wdt:P1433 wd:Q3213360 .
   ?article wdt:P478 "${volume}" .
   ${issueClause}
 } LIMIT 500
-      `.trim();
+        `.trim();
+      } else {
+        const titleRegex = titleQuery ? `FILTER(REGEX(?title, "${titleQuery.replace(/"/g, '\\\\"')}", "i"))` : '';
+        const titlePattern = titleQuery ? `?article rdfs:label ?title .\n    ${titleRegex}` : '';
+
+        const authorRegex = authorQuery ? `FILTER(REGEX(?authorName, "${authorQuery.replace(/"/g, '\\\\"')}", "i"))` : '';
+        const authorStrRegex = authorQuery ? `FILTER(REGEX(?authorNameStr, "${authorQuery.replace(/"/g, '\\\\"')}", "i"))` : '';
+
+        if (authorQuery) {
+          sparqlQuery = `
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?article WHERE {
+  {
+    ?article wdt:P1433 wd:Q3213360 .
+    ${titlePattern}
+    ?article wdt:P50 ?authorItem .
+    ?authorItem rdfs:label ?authorName .
+    ${authorRegex}
+  } UNION {
+    ?article wdt:P1433 wd:Q3213360 .
+    ${titlePattern}
+    ?article wdt:P2093 ?authorNameStr .
+    ${authorStrRegex}
+  }
+} LIMIT 500
+          `.trim();
+        } else {
+          sparqlQuery = `
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?article WHERE {
+  ?article wdt:P1433 wd:Q3213360 .
+  ${titlePattern}
+} LIMIT 500
+          `.trim();
+        }
+      }
       
-      const qleverUrl = `https://qlever.dev/api/wikidata?query=${encodeURIComponent(sparqlQuery)}`;
+      const qleverUrl = `https://qlever.cs.uni-freiburg.de/api/wikidata?query=${encodeURIComponent(sparqlQuery)}`;
       const qleverRes = await fetch(qleverUrl, {
         headers: { 'Accept': 'application/sparql-results+json' }
       });
 
       if (!qleverRes.ok) {
-        throw new Error('Failed to fetch from QLever query service.');
+        let errorMsg = 'Failed to fetch from QLever query service.';
+        try {
+          const errorData = await qleverRes.text();
+          if (errorData) errorMsg += ` Details: ${errorData.substring(0, 100)}`;
+        } catch (e) {
+          // ignore
+        }
+        throw new Error(errorMsg);
       }
 
       const qleverData = await qleverRes.json();
       const bindings = qleverData.results?.bindings || [];
       
       if (bindings.length === 0) {
-        setError(issue ? `No articles found for Volume ${volume}, Issue ${issue}.` : `No articles found for Volume ${volume}.`);
+        if (searchMode === 'toc') {
+          setError(issue ? `No articles found for Volume ${volume}, Issue ${issue}.` : `No articles found for Volume ${volume}.`);
+        } else {
+          setError('No articles found matching your search criteria.');
+        }
         setLoading(false);
         return;
       }
@@ -213,7 +276,7 @@ SELECT ?article WHERE {
 
   useEffect(() => {
     // Initial fetch on mount
-    fetchTOC();
+    fetchArticles();
   }, []);
 
   return (
@@ -222,38 +285,88 @@ SELECT ?article WHERE {
         <header className="mb-10 text-center">
           <img src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/tunismed.png" alt="La Tunisie Médicale" className="h-24 w-auto mx-auto mb-4 object-contain" />
           <h1 className="text-4xl font-semibold tracking-tight mb-2">La Tunisie Médicale</h1>
-          <p className="text-slate-500 mb-8 font-medium">Table of Contents Generator via Wikidata</p>
+          <p className="text-slate-500 mb-8 font-medium">Article Explorer via Wikidata</p>
           
+          <div className="flex justify-center mb-6">
+            <div className="bg-slate-200 p-1 rounded-xl inline-flex">
+              <button 
+                onClick={() => setSearchMode('toc')}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${searchMode === 'toc' ? 'bg-white shadow-sm text-blue-700' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Table of Contents
+              </button>
+              <button 
+                onClick={() => setSearchMode('search')}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${searchMode === 'search' ? 'bg-white shadow-sm text-blue-700' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Search by Keyword
+              </button>
+            </div>
+          </div>
+
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 inline-flex flex-wrap items-center justify-center gap-4 max-w-full">
-            <div className="flex items-center gap-2">
-              <label htmlFor="volume" className="text-sm font-semibold text-slate-700">Volume</label>
-              <input 
-                id="volume"
-                type="text" 
-                value={volume}
-                onChange={(e) => setVolume(e.target.value)}
-                className="w-20 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-center"
-                placeholder="102"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <label htmlFor="issue" className="text-sm font-semibold text-slate-700">Issue (Optional)</label>
-              <input 
-                id="issue"
-                type="text" 
-                value={issue}
-                onChange={(e) => setIssue(e.target.value)}
-                className="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-center"
-                placeholder="2"
-              />
-            </div>
+            {searchMode === 'toc' ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="volume" className="text-sm font-semibold text-slate-700">Volume</label>
+                  <input 
+                    id="volume"
+                    type="text" 
+                    value={volume}
+                    onChange={(e) => setVolume(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && fetchArticles()}
+                    className="w-20 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-center"
+                    placeholder="102"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="issue" className="text-sm font-semibold text-slate-700">Issue (Optional)</label>
+                  <input 
+                    id="issue"
+                    type="text" 
+                    value={issue}
+                    onChange={(e) => setIssue(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && fetchArticles()}
+                    className="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-center"
+                    placeholder="2"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="titleQuery" className="text-sm font-semibold text-slate-700">Title Word</label>
+                  <input 
+                    id="titleQuery"
+                    type="text" 
+                    value={titleQuery}
+                    onChange={(e) => setTitleQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && fetchArticles()}
+                    className="w-32 sm:w-48 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                    placeholder="e.g. cancer"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="authorQuery" className="text-sm font-semibold text-slate-700">Author</label>
+                  <input 
+                    id="authorQuery"
+                    type="text" 
+                    value={authorQuery}
+                    onChange={(e) => setAuthorQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && fetchArticles()}
+                    className="w-32 sm:w-48 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                    placeholder="e.g. ben"
+                  />
+                </div>
+              </>
+            )}
             <button 
-              onClick={fetchTOC}
+              onClick={fetchArticles}
               disabled={loading}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              Fetch TOC
+              {searchMode === 'toc' ? 'Fetch TOC' : 'Search'}
             </button>
           </div>
         </header>
@@ -350,12 +463,12 @@ SELECT ?article WHERE {
           />
           <img
             src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/ant.png"
-            alt="Archives Nationales de Tunisie"
+            alt="Académie Nationale de Médecine"
             className="h-10 w-auto object-contain hover:scale-105 transition-transform"
           />
           <img
             src="https://raw.githubusercontent.com/csisc/LaTunisieMedicale/refs/heads/main/img/ais.png"
-            alt="Google AI Studio"
+            alt="AI Studio"
             className="h-10 w-auto object-contain hover:scale-105 transition-transform"
           />
         </div>
